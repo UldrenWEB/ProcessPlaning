@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2024/06/29 16:11:18.000.909,=C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\Unit1.pas</Transaction>
+    <Transaction>2024/06/29 16:20:01.000.013,C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\Unit1.pas=C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\view.pas</Transaction>
+    <Transaction>2024/06/29 16:20:01.000.013,C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\Unit1.dfm=C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\view.dfm</Transaction>
+    <Transaction>2024/06/29 16:20:18.000.219,C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\Project1.dproj=C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\ProcessPlaning.dproj</Transaction>
+    <Transaction>2024/06/29 17:54:20.000.770,C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\ProcessPlaning.dproj=C:\Users\uldre\Desktop\Uldren\Desarrollo\Entornos\RAD11\Projects\PlanificacionProcesos\ProcessPlaning.dproj</Transaction>
+  </Transactions>
+</BorlandProject>
