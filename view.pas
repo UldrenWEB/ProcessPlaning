@@ -7,6 +7,9 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, DateUtils, System.Diagnostics;
 
 type
+  TTResultI = record
+  iFF, iLF, iRR: Extended;
+  end;
  TThreadFifo = class(TThread)
   protected
     procedure Execute; override;
@@ -46,6 +49,8 @@ type
     gridResult: TStringGrid;
     Label1: TLabel;
     delRow: TButton;
+    lbWinner: TLabel;
+    winner: TLabel;
     procedure selectCell(Sender: TObject; ACol, ARow: Integer;
       var CanSelect: Boolean);
     procedure create(Sender: TObject);
@@ -68,6 +73,8 @@ type
 
 var
   Form1: TForm1;
+  ResultI: TTResultI;
+
 
 implementation
 
@@ -99,9 +106,12 @@ begin
 
   stopWatchFifo.Stop;
 
+  ResultI.iFF := avgFifo.I;
   exeTimeFifo := stopWatchFifo.ElapsedMilliseconds;
   Form1.gridResult.Cells[1,1] := IntToStr(exeTimeFifo);
-  Form1.gridResult.Cells[1,2] := FloatToStr(performanceFifo)+'%';
+  Form1.gridResult.Cells[1,2] := FormatFloat('0.000',avgFifo.T);
+  Form1.gridResult.Cells[1,3] := FormatFloat('0.000', avgFifo.E);
+  Form1.gridResult.Cells[1,4] := FormatFloat('0.000', avgFifo.I);
 
 end;
 
@@ -135,7 +145,10 @@ begin
 
   exeTimeLifo := stopWatchLifo.ElapsedMilliseconds;
   Form1.gridResult.Cells[2,1] := IntToStr(exeTimeLifo);
-  Form1.gridResult.Cells[2,2] := FloatToStr(performanceLifo)+'%';
+  Form1.gridResult.Cells[2,2] := FormatFloat('0.000', avgLifo.T);
+  Form1.gridResult.Cells[2,3] := FormatFloat('0.000', avgLifo.E);
+  Form1.gridResult.Cells[2,4] := FormatFloat('0.000', avgLifo.I);
+
 end;
 
 constructor TThreadRR.Create;
@@ -161,18 +174,16 @@ begin
   Form1.CalculateTF(taskRR, 'RR', 4);
   resultRR := Form1.CalculateTEI(taskRR);
 
-  for i := 0 to High(taskRR) do
-    ShowMessage('tf = '+IntToStr(taskRR[i].tf));
-
-
   avgRR := Form1.CalculateAvg(resultRR);
   performanceRR := Form1.CalculatePerformace(avgRR);
 
   stopWatchRR.Stop;
 
   exeTimeRR := stopWatchRR.ElapsedMilliseconds;
-  Form1.gridResult.Cells[2,1] := IntToStr(exeTimeRR);
-  Form1.gridResult.Cells[2,2] := FloatToStr(performanceRR)+'%';
+  Form1.gridResult.Cells[3,1] := IntToStr(exeTimeRR);
+  Form1.gridResult.Cells[3,2] := FormatFloat('0.000', avgRR.T);
+  Form1.gridResult.Cells[3,3] := FormatFloat('0.000', avgRR.E);
+  Form1.gridResult.Cells[3,4] := FormatFloat('0.000', avgRR.I);
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
@@ -191,7 +202,7 @@ var
   ThreadFifo : TThreadFifo;
   ThreadLifo : TThreadLifo;
   ThreadRR: TThreadRR;
-  stopWatch : TStopwatch;
+  winnerCaption: string;
 begin
 
   isValid := True;
@@ -217,7 +228,19 @@ begin
 
     ThreadFifo := TThreadFifo.Create;
     ThreadLifo := TThreadLifo.Create;
-//      ThreadRR := TThreadRR.Create;
+    ThreadRR := TThreadRR.Create;
+
+
+    Sleep(100);
+    if (ResultI.iFF < ResultI.iLF) and (ResultI.iFF < ResultI.iRR) then
+      winnerCaption := 'FIFO'
+    else if (ResultI.iLF < ResultI.iRR) then
+      winnerCaption := 'LIFO'
+    else
+      winnerCaption := 'RoundRobin';
+
+    lbWinner.Visible := True;
+    winner.Caption := winnerCaption;
 
 
 
@@ -229,7 +252,7 @@ begin
   gridData.RowCount := 2;
 
   gridResult.ColCount := 4;
-  gridResult.RowCount := 3;
+  gridResult.RowCount := 5;
 
   //Columna de Encabezado (Grid de Resultados)
   gridResult.Cells[0,0] := 'Rendimiento';
@@ -238,13 +261,17 @@ begin
   gridResult.Cells[3,0] := 'Round Robin';
 
   gridResult.Cells[0,1] := 'Tiempo (ms)';
-  gridResult.Cells[0,2] := 'Porcentaje (%)';
+  gridResult.Cells[0,2] := 'T';
+  gridResult.Cells[0,3] := 'E';
+  gridResult.Cells[0,4] := 'I';
 
+  //Columna de ingreso de datos (Grid de Datos)
   gridData.Cells[0,0] := 'Tiempo inicial (ti)';
   gridData.Cells[1,0] := 'Tiempo de servicio (t)';
 
   gridData.OnSelectCell := selectCell;
 
+  //Ajuste del grid de datos segun sus filas
   AdjustGridHeight;
 end;
 
@@ -366,38 +393,42 @@ procedure RoundRobin;
   var
     clock, processedCount, i: Integer;
     found: Boolean;
+    remainingTime: array of Integer;
   begin
-    clock := 0;
-    processedCount := 0;
-    repeat
-      found := False;
-      for i := 0 to High(Matrix) do
+  clock := 0;
+  processedCount := 0;
+  SetLength(remainingTime, Length(Matrix));
+
+  for i := 0 to High(Matrix) do
+    remainingTime[i] := Matrix[i].t;
+
+  repeat
+    found := False;
+    for i := 0 to High(Matrix) do
+    begin
+      if (Matrix[i].tf = 0) and (Matrix[i].ti <= clock) then
       begin
-        if (Matrix[i].tf = 0) and (Matrix[i].ti <= clock)  then
+        found := True;
+        if remainingTime[i] > quantum then
         begin
-          found := True;
-          ShowMessage('Encontro un valor');
-          if Matrix[i].t < Quantum then
-          begin
-            clock := clock + Quantum;
-            Matrix[i].t := Matrix[i].t - Quantum;
-          end
-          else
-          begin
-            clock := clock + Matrix[i].t;
-            Matrix[i].tf := clock;
-            Inc(processedCount);
-          end;
+          remainingTime[i] := remainingTime[i] - quantum;
+          clock := clock + quantum;
+        end
+        else
+        begin
+          clock := clock + remainingTime[i];
+          Matrix[i].tf := clock;
+          remainingTime[i] := 0;
+          Inc(processedCount);
         end;
       end;
-      if not found  then
-        begin
-          ShowMessage('Se suma el clock -> '+IntToStr(quantum));
-          clock := clock + Quantum;
-        end;
+    end;
 
-    until processedCount = Length(Matrix);
-  end;
+    if not found then
+      Inc(clock);
+
+  until processedCount = Length(Matrix);
+end;
 
 begin
   if Algorithm = 'FIFO' then

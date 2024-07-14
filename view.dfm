@@ -14,7 +14,7 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 15
   object title: TLabel
-    Left = 272
+    Left = 392
     Top = 24
     Width = 153
     Height = 24
@@ -37,6 +37,34 @@ object Form1: TForm1
     Font.Height = -16
     Font.Name = 'Times New Roman'
     Font.Style = []
+    ParentFont = False
+  end
+  object lbWinner: TLabel
+    Left = 336
+    Top = 312
+    Width = 330
+    Height = 19
+    Alignment = taCenter
+    Caption = 'El algoritmo mas eficiente para completar esta tarea es:'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Style = []
+    ParentFont = False
+    Transparent = True
+    Visible = False
+  end
+  object winner: TLabel
+    Left = 688
+    Top = 312
+    Width = 4
+    Height = 19
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Style = [fsBold]
     ParentFont = False
   end
   object gridData: TStringGrid
@@ -91,10 +119,16 @@ object Form1: TForm1
     Left = 315
     Top = 112
     Width = 527
-    Height = 78
+    Height = 129
     DefaultColWidth = 130
     ScrollBars = ssNone
     TabOrder = 3
+    RowHeights = (
+      24
+      24
+      24
+      24
+      24)
   end
   object delRow: TButton
     Left = 119
