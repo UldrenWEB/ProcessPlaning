@@ -136,6 +136,7 @@ begin
   stopWatchLifo.Start;
 
   Form1.CalculateTF(taskLifo, 'LIFO');
+
   resultLifo := Form1.CalculateTEI(taskLifo);
 
   avgLifo := Form1.CalculateAvg(resultLifo);
@@ -143,6 +144,7 @@ begin
 
   stopWatchLifo.Stop;
 
+  ResultI.iLF := avgLifo.I;
   exeTimeLifo := stopWatchLifo.ElapsedMilliseconds;
   Form1.gridResult.Cells[2,1] := IntToStr(exeTimeLifo);
   Form1.gridResult.Cells[2,2] := FormatFloat('0.000', avgLifo.T);
@@ -179,6 +181,7 @@ begin
 
   stopWatchRR.Stop;
 
+  ResultI.iRR := avgRR.I;
   exeTimeRR := stopWatchRR.ElapsedMilliseconds;
   Form1.gridResult.Cells[3,1] := IntToStr(exeTimeRR);
   Form1.gridResult.Cells[3,2] := FormatFloat('0.000', avgRR.T);
@@ -231,10 +234,10 @@ begin
     ThreadRR := TThreadRR.Create;
 
 
-    Sleep(100);
-    if (ResultI.iFF < ResultI.iLF) and (ResultI.iFF < ResultI.iRR) then
+    Sleep(200);
+    if (ResultI.iFF > ResultI.iLF) and (ResultI.iFF > ResultI.iRR) then
       winnerCaption := 'FIFO'
-    else if (ResultI.iLF < ResultI.iRR) then
+    else if (ResultI.iLF > ResultI.iRR) then
       winnerCaption := 'LIFO'
     else
       winnerCaption := 'RoundRobin';
@@ -386,7 +389,7 @@ procedure FIFO;
           Inc(clock);
         end;
 
-    until (processedCount = Length(Matrix)) or (clock > 1000);
+    until (processedCount = Length(Matrix));
   end;
 
 procedure RoundRobin;
@@ -398,10 +401,8 @@ procedure RoundRobin;
   clock := 0;
   processedCount := 0;
   SetLength(remainingTime, Length(Matrix));
-
   for i := 0 to High(Matrix) do
     remainingTime[i] := Matrix[i].t;
-
   repeat
     found := False;
     for i := 0 to High(Matrix) do
@@ -423,10 +424,8 @@ procedure RoundRobin;
         end;
       end;
     end;
-
     if not found then
       Inc(clock);
-
   until processedCount = Length(Matrix);
 end;
 

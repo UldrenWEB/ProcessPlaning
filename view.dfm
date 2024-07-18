@@ -56,7 +56,7 @@ object Form1: TForm1
     Visible = False
   end
   object winner: TLabel
-    Left = 688
+    Left = 672
     Top = 312
     Width = 4
     Height = 19
